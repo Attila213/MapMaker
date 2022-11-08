@@ -85,34 +85,16 @@ while True:
                     dw.selected_tile_img = selected_tile["value"]
                     dw.selected_tile_rect = selected_tile["rect"]
             
-        if event.type == pygame.KEYDOWN:
-            if event.key == pygame.K_a:
-                holding["a"] = True
-            if event.key == pygame.K_d:
-                holding["d"] = True
-            if event.key == pygame.K_w:
-                holding["w"] = True
-            if event.key == pygame.K_s:
-                holding["s"] = True
-        
-        if event.type == pygame.KEYUP:
-            if event.key == pygame.K_a:
-                holding["a"] = False
-            if event.key == pygame.K_d:
-                holding["d"] = False
-            if event.key == pygame.K_w:
-                holding["w"] = False
-            if event.key == pygame.K_s:
-                holding["s"] = False
-    
-    if holding["a"]:
-        dw.scroll[0] += 3
-    if holding["d"]:
-        dw.scroll[0] -= 3
-    if holding["w"]:
-        dw.scroll[1] += 3
-    if holding["s"]:
-        dw.scroll[1] -= 3
+
+    keys = pygame.key.get_pressed()
+    if keys[K_w]:
+        dw.scroll[1]+=2
+    if keys[K_s]:
+        dw.scroll[1]-=2
+    if keys[K_a]:
+        dw.scroll[0]+=2
+    if keys[K_d]:
+        dw.scroll[0]-=2
     
     pygame.draw.rect(drawing,(255,0,0),scrollRect(10,10,18,18))
     #---------------------------------------------------
@@ -134,6 +116,6 @@ while True:
         screen.blit(surfaces[i][0],Dpos[i])
         surfaces[i][0].blit(pygame.transform.scale(surfaces[i][1],Dsizes[i]),(0,0))
         
-    clock.tick(60)
+    clock.tick(120)
     pygame.display.update()
     
