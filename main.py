@@ -10,7 +10,8 @@ clock = pygame.time.Clock()
 pygame.init()
 
 
-
+def scrollRect(left,top,width,height):
+    return pygame.Rect(left+dw.scroll[0],top+dw.scroll[1],width,height)
 
 #region displays
 WINDOW_SIZE = [1000,700]
@@ -105,15 +106,15 @@ while True:
                 holding["s"] = False
     
     if holding["a"]:
-        dw.scroll[0] -= 1
+        dw.scroll[0] += 3
     if holding["d"]:
-        dw.scroll[0] += 1
+        dw.scroll[0] -= 3
     if holding["w"]:
-        dw.scroll[1] -= 1
+        dw.scroll[1] += 3
     if holding["s"]:
-        dw.scroll[1] += 1
+        dw.scroll[1] -= 3
     
-    
+    pygame.draw.rect(drawing,(255,0,0),scrollRect(10,10,18,18))
     #---------------------------------------------------
     if mouse_display_pos =="side_top":
         for i in range(len(sidetop.tilesets)):
