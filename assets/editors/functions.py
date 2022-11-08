@@ -1,4 +1,4 @@
-import pygame,sys,os,random,re
+import pygame,sys,os,random,json
 
 # make a col*row size table and return an array full of rects
 def map_generation(startpos,size,col,row):
@@ -55,5 +55,24 @@ def image_loader(path):
         imgs = []
         path = path
         for i in os.listdir(path):
-            imgs.append([i.split(".")[0],pygame.image.load(path+i).convert()]) 
+            imgs.append([i.split(".")[0],pygame.image.load(path+i).convert_alpha()]) 
     return imgs
+
+def loadJson(filename,value):
+    
+    arr = any
+    try:
+        with open(filename+".json","r") as f:
+            try:
+                arr=json.load(f)
+            except:
+                arr = value
+    except:
+        writeJson(filename,value)
+        with open(filename+".json","r") as f:
+            arr=json.load(f)
+    return arr
+
+def writeJson(filename,arr):
+    with open(filename+".json", 'w') as outfile:
+        json.dump(arr, outfile)

@@ -1,6 +1,6 @@
-import functions as fun
+import assets.editors.functions as fun
 import pygame
-import font
+import assets.editors.font as font
 
 class Drawing:
     def __init__(self,display):

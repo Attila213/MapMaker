@@ -1,8 +1,8 @@
 import sys,pygame,math
-import functions as fun
-import SideTop as ST
-import SideBottom as SB
-import Drawing as DW
+import assets.editors.functions as fun
+import Classes.SideTop as ST
+import Classes.SideBottom as SB
+import Classes.Drawing as DW
 from pygame.locals import *
 
 clock = pygame.time.Clock()
@@ -23,12 +23,12 @@ Dscales =[2.1,2,2]
 
 surfaces = []
 for i in range(len(Dpos)):
-    #display,scaling,rect    
+    #display,scaling,rect
     surfaces.append([pygame.Surface(Dsizes[i]).convert(),pygame.Surface((Dsizes[i][0]/Dscales[i],Dsizes[i][1]/Dscales[i])).convert(),pygame.Rect(Dpos[i][0],Dpos[i][1],Dsizes[i][0],Dsizes[i][1])])
 
 side_top = surfaces[0][1]
 side_bottom = surfaces[1][1]
-drawing = surfaces[2][1] 
+drawing = surfaces[2][1]
 #endregion
 mouse_display_pos = any
 
@@ -37,15 +37,8 @@ sidebottom = SB.SideBottom(surfaces[1][1])
 dw = DW.Drawing(surfaces[2][1])
 
 tile_size = 18
+
 #------------------------------------------------------
-holding = {
-    "a":False,
-    "d":False,
-    "s":False,
-    "w":False,
-    "mouse_right":False,
-    "mouse_left":False
-}
 
 while True:
     #region fill displays
@@ -54,7 +47,7 @@ while True:
     drawing.fill((0,0,0))
     pygame.draw.line(side_top,(100,100,100),(0,side_top.get_height()-1),(side_top.get_width()-1,side_top.get_height()-1))
     #endregion
-    
+
     #mouse positioning-----------------------------------
     mx,my = pygame.mouse.get_pos()
     for i in range(len(surfaces)):
@@ -79,12 +72,12 @@ while True:
                     sidebottom.buttons.clear()
                     sidebottom.tiles = sidetop.listClickedvalue([mx,my])
                     sidebottom.setTilesLocation()
-                
+
                 if mouse_display_pos == "side_bottom":
                     selected_tile = sidebottom.setClickedValue([mx,my])
                     dw.selected_tile_img = selected_tile["value"]
                     dw.selected_tile_rect = selected_tile["rect"]
-            
+
 
     keys = pygame.key.get_pressed()
     if keys[K_w]:
@@ -95,27 +88,30 @@ while True:
         dw.scroll[0]+=2
     if keys[K_d]:
         dw.scroll[0]-=2
-    
-    pygame.draw.rect(drawing,(255,0,0),scrollRect(10,10,18,18))
+
+    if dw.selected_tile_img != None:
+        firsttile = scrollRect(10,10,18,18)
+        pygame.draw.rect(drawing,(255,0,0),firsttile)
+        drawing.blit(dw.selected_tile_img,(firsttile.x,firsttile.y-(dw.selected_tile_img.get_height()-18)))
     #---------------------------------------------------
     if mouse_display_pos =="side_top":
         for i in range(len(sidetop.tilesets)):
             if sidetop.buttons[i]["rect"].collidepoint([mx,my]):
                 pygame.draw.rect(sidetop.display,(20,20,20),sidetop.buttons[i]["rect"])
     sidetop.listTilesets([mx,my])
-    
+
     #draw the current selected tile
     if dw.selected_tile_img != None:
         drawing.blit(dw.selected_tile_img,(10,10))
-    
-    #draw tiles underneath each other    
+
+    #draw tiles underneath each other
     sidebottom.drawTiles()
-        
+
     #blit displays---------------------------------------
     for i in range(len(surfaces)):
         screen.blit(surfaces[i][0],Dpos[i])
         surfaces[i][0].blit(pygame.transform.scale(surfaces[i][1],Dsizes[i]),(0,0))
         
+
     clock.tick(120)
     pygame.display.update()
-    
