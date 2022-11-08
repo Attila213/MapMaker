@@ -3,11 +3,13 @@ import functions as fun
 import SideTop as ST
 import SideBottom as SB
 import Drawing as DW
-
-
 from pygame.locals import *
 
+clock = pygame.time.Clock()
+
 pygame.init()
+
+
 
 
 #region displays
@@ -35,7 +37,14 @@ dw = DW.Drawing(surfaces[2][1])
 
 tile_size = 18
 #------------------------------------------------------
-
+holding = {
+    "a":False,
+    "d":False,
+    "s":False,
+    "w":False,
+    "mouse_right":False,
+    "mouse_left":False
+}
 
 while True:
     #region fill displays
@@ -74,7 +83,37 @@ while True:
                     selected_tile = sidebottom.setClickedValue([mx,my])
                     dw.selected_tile_img = selected_tile["value"]
                     dw.selected_tile_rect = selected_tile["rect"]
-                
+            
+        if event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_a:
+                holding["a"] = True
+            if event.key == pygame.K_d:
+                holding["d"] = True
+            if event.key == pygame.K_w:
+                holding["w"] = True
+            if event.key == pygame.K_s:
+                holding["s"] = True
+        
+        if event.type == pygame.KEYUP:
+            if event.key == pygame.K_a:
+                holding["a"] = False
+            if event.key == pygame.K_d:
+                holding["d"] = False
+            if event.key == pygame.K_w:
+                holding["w"] = False
+            if event.key == pygame.K_s:
+                holding["s"] = False
+    
+    if holding["a"]:
+        dw.scroll[0] -= 1
+    if holding["d"]:
+        dw.scroll[0] += 1
+    if holding["w"]:
+        dw.scroll[1] -= 1
+    if holding["s"]:
+        dw.scroll[1] += 1
+    
+    
     #---------------------------------------------------
     if mouse_display_pos =="side_top":
         for i in range(len(sidetop.tilesets)):
@@ -93,7 +132,7 @@ while True:
     for i in range(len(surfaces)):
         screen.blit(surfaces[i][0],Dpos[i])
         surfaces[i][0].blit(pygame.transform.scale(surfaces[i][1],Dsizes[i]),(0,0))
-    
-   
+        
+    clock.tick(60)
     pygame.display.update()
     
