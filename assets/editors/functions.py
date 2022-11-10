@@ -58,8 +58,7 @@ def image_loader(path):
             imgs.append([i.split(".")[0],pygame.image.load(path+i).convert_alpha()]) 
     return imgs
 
-def loadJson(filename,value):
-    
+def loadJson(filename,value={}):
     arr = any
     try:
         with open(filename+".json","r") as f:
