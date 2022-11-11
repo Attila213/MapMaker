@@ -12,7 +12,7 @@ class SideTop:
         #the chosen tileset (value:name of the tileset) (rect:rect of the button)
         self.current_tileset = []
         
-        #az összes gomb egyben value:neve rect:a gomb rect-je
+        #all of the buttons value:name rect:rect of the button
         self.buttons = []
         for i in range(len(self.tilesets)):
             self.buttons.append({"value":str(self.tilesets[i][0]),"rect":pygame.Rect(0,4+(i*10),self.display.get_width(),10)})
