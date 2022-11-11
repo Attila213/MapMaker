@@ -9,6 +9,7 @@ clock = pygame.time.Clock()
 
 pygame.init()
 
+map = []
 
 def scrollRect(left,top,width,height):
     return pygame.Rect(left+dw.scroll[0],top+dw.scroll[1],width,height)
@@ -33,6 +34,7 @@ drawing = surfaces[2][1]
 mouse_display_pos = any
 
 tile_size = 18
+scroll_speed =tile_size
 
 sidetop = ST.SideTop(surfaces[0][1])
 sidebottom = SB.SideBottom(surfaces[1][1])
@@ -40,7 +42,7 @@ dw = DW.Drawing(surfaces[2][1],tile_size)
 
 
 #------------------------------------------------------
-
+frame = 0
 while True:
     #region fill displays
     side_top.fill((20, 35, 40))
@@ -49,6 +51,7 @@ while True:
     pygame.draw.line(side_top,(100,100,100),(0,side_top.get_height()-1),(side_top.get_width()-1,side_top.get_height()-1))
     #endregion
 
+    frame += 1
     #mouse positioning-----------------------------------
     mx,my = pygame.mouse.get_pos()
     for i in range(len(surfaces)):
@@ -61,8 +64,8 @@ while True:
             if i == 2:
                 mx -= 200
                 mouse_display_pos = "drawing"
-            mx = mx/Dscales[i]
-            my = my/Dscales[i]
+            mx = int(mx/Dscales[i])
+            my = (my/Dscales[i])
     #-----------------------------------------------------
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
@@ -82,20 +85,32 @@ while True:
                     dw.selected_tile_rect = selected_tile["rect"]
                     dw.offset_index = selected_tile["index"]
                     dw.offset = fun.loadJson("assets/images/offsets/"+dw.offset_name)
+
+                if mouse_display_pos == "drawing":
+                    map.append(pygame.Rect(dw.selected_tile_rect.x,dw.selected_tile_rect.y,dw.selected_tile_rect.width,dw.selected_tile_rect.height))
                 
-                # if mouse_display_pos =="drawing":
-                #     print(dw.tile_x,dw.tile_y) 
-
     keys = pygame.key.get_pressed()
-    if keys[K_w]:
-        dw.scroll[1]+=2
-    if keys[K_s]:
-        dw.scroll[1]-=2
-    if keys[K_a]:
-        dw.scroll[0]+=2
-    if keys[K_d]:
-        dw.scroll[0]-=2
+    if frame % 2 == 0:
+        if keys[K_w]:
+            dw.scroll[1]+=scroll_speed
+            for i in map:
+                i.y += scroll_speed
+        if keys[K_s]:
+            dw.scroll[1]-=scroll_speed
+            for i in map:
+                i.y -= scroll_speed
+        if keys[K_a]:
+            dw.scroll[0]+=scroll_speed
+            for i in map:
+                i.x += scroll_speed
+        if keys[K_d]:
+            dw.scroll[0]-=scroll_speed
+            for i in map:
+                i.x -= scroll_speed
 
+    pygame.draw.rect(drawing,(255,0,0),scrollRect(180,180,18,18))
+    
+    
     if dw.selected_tile_img != None and mouse_display_pos=="drawing":
         dw.drawTileHover([mx,my])
     #---------------------------------------------------
@@ -114,11 +129,14 @@ while True:
 
     #drawing--------------------------------------------
     
+    for i in map:
+        pygame.draw.rect(drawing,(255,0,0),i)
+    
     #blit displays---------------------------------------
     for i in range(len(surfaces)):
         screen.blit(surfaces[i][0],Dpos[i])
         surfaces[i][0].blit(pygame.transform.scale(surfaces[i][1],Dsizes[i]),(0,0))
         
 
-    clock.tick(300)
+    clock.tick(60)
     pygame.display.update()
