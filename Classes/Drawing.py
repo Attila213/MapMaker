@@ -28,13 +28,7 @@ class Drawing:
               
         self.tile_x = ((mouse_pos[0]//self.tile_size)*self.tile_size)-(self.scroll[0]%18)
         self.tile_y = ((mouse_pos[1]//self.tile_size)*self.tile_size)-(self.scroll[1]%18)
-        
-        
-        
-        
-        
-       
-           
+
         self.selected_tile_rect = pygame.Rect(self.tile_x,self.tile_y,self.tile_size,self.tile_size)
 
         pygame.draw.rect(self.display,(255,0,0),self.selected_tile_rect)
