@@ -34,7 +34,7 @@ drawing = surfaces[2][1]
 mouse_display_pos = any
 
 tile_size = 18
-scroll_speed =tile_size
+scroll_speed =1
 
 sidetop = ST.SideTop(surfaces[0][1])
 sidebottom = SB.SideBottom(surfaces[1][1])
@@ -90,27 +90,24 @@ while True:
                     map.append(pygame.Rect(dw.selected_tile_rect.x,dw.selected_tile_rect.y,dw.selected_tile_rect.width,dw.selected_tile_rect.height))
                 
     keys = pygame.key.get_pressed()
-    if frame % 2 == 0:
-        if keys[K_w]:
-            dw.scroll[1]+=scroll_speed
-            for i in map:
-                i.y += scroll_speed
-        if keys[K_s]:
-            dw.scroll[1]-=scroll_speed
-            for i in map:
-                i.y -= scroll_speed
-        if keys[K_a]:
-            dw.scroll[0]+=scroll_speed
-            for i in map:
-                i.x += scroll_speed
-        if keys[K_d]:
-            dw.scroll[0]-=scroll_speed
-            for i in map:
-                i.x -= scroll_speed
-
-    pygame.draw.rect(drawing,(255,0,0),scrollRect(180,180,18,18))
+    if keys[K_w]:
+        dw.scroll[1]+=scroll_speed
+        for i in map:
+            i.y += scroll_speed
+    if keys[K_s]:
+        dw.scroll[1]-=scroll_speed
+        for i in map:
+            i.y -= scroll_speed
+    if keys[K_a]:
+        dw.scroll[0]+=scroll_speed
+        for i in map:
+            i.x += scroll_speed
+    if keys[K_d]:
+        dw.scroll[0]-=scroll_speed
+        for i in map:
+            i.x -= scroll_speed
     
-    
+    #draw the tile_marker
     if dw.selected_tile_img != None and mouse_display_pos=="drawing":
         dw.drawTileHover([mx,my])
     #---------------------------------------------------
@@ -138,5 +135,5 @@ while True:
         surfaces[i][0].blit(pygame.transform.scale(surfaces[i][1],Dsizes[i]),(0,0))
         
 
-    clock.tick(60)
+    clock.tick(300)
     pygame.display.update()
