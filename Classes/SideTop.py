@@ -17,11 +17,12 @@ class SideTop:
         for i in range(len(self.tilesets)):
             self.buttons.append({"value":str(self.tilesets[i][0]),"rect":pygame.Rect(0,4+(i*10),self.display.get_width(),10)})
 
-    #draw buttons
+    #draw tilesets buttons
     def listTilesets(self,mouse_pos):
         for i in range(len(self.tilesets)):
             self.font.render(str(self.tilesets[i][0]),self.display,(5,5+(10*i)),None)
 
+    #return clicked tileset
     def listClickedvalue(self,mouse_pos):
         for i in range(len(self.tilesets)):
             if self.buttons[i]["rect"].collidepoint(mouse_pos):

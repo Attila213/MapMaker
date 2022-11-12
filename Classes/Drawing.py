@@ -59,7 +59,12 @@ class Drawing:
         
         self.display.blit(placeholder_img,self.currentTilePos())
 
-    
+    def drawMap(self,map):
+        for i in map:
+            #we draw it if it can be seen bc we can improve the processing speed
+            if (i["img_pos"][0] > 0 and i["img_pos"][0] < self.display.get_width()-self.tile_size) and (i["img_pos"][1] > 0 and i["img_pos"][1] < self.display.get_height()-self.tile_size):
+                self.display.blit(i["img"],(i["img_pos"][0],i["img_pos"][1]))
+        
         
         
     

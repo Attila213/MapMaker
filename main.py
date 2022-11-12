@@ -53,7 +53,7 @@ while True:
     #endregion
 
     frame += 1
-    #mouse positioning-----------------------------------
+    #mouse positioning
     mx,my = pygame.mouse.get_pos()
     for i in range(len(surfaces)):
         if surfaces[i][2].collidepoint(mx,my):
@@ -68,7 +68,7 @@ while True:
             mx = int(mx/Dscales[i])
             my = (my/Dscales[i])
     
-    #-----------------------------------------------------   
+    #region events
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             sys.exit()
@@ -93,52 +93,14 @@ while True:
                     dw.selected_tile_rect = selected_tile["rect"]
                     dw.offset_index = selected_tile["index"]
                     dw.offset = fun.loadJson("assets/images/offsets/"+dw.offset_name)
-                 
-    #draw the tile_marker
-    if mouse_display_pos=="drawing":
-        if dw.selected_tile_img != None:
-            dw.drawTileHover([mx,my])
-            
-        #if the left click is being held
-        if hold_left:
-            #check if the tile exists in the array
-            found = False
-            for i in map:
-                if i["rect"] == dw.selected_tile_rect:
-                    found = True
-            
-            #if it does then append
-            if not found:
-                    map.append({"rect":dw.selected_tile_rect,"img_pos":dw.currentTilePos(),"img":dw.selected_tile_img})
-    
-    #---------------------------------------------------
-    if mouse_display_pos =="side_top":
-        for i in range(len(sidetop.tilesets)):
-            if sidetop.buttons[i]["rect"].collidepoint([mx,my]):
-                pygame.draw.rect(sidetop.display,(20,20,20),sidetop.buttons[i]["rect"])
-    sidetop.listTilesets([mx,my])
 
-    #draw the current selected tile
-    if dw.selected_tile_img != None :
-        drawing.blit(dw.selected_tile_img,(10,10))
-
-    #draw tiles underneath each other
-    sidebottom.drawTiles()
-
-    #drawing--------------------------------------------
-
-    #draw the map to the drawing screen
-    for i in map:
-        #we draw it if it can be seen bc we can improve the processing speed
-        if (i["img_pos"][0] > 0 and i["img_pos"][0] < drawing.get_width()-tile_size) and (i["img_pos"][1] > 0 and i["img_pos"][1] < drawing.get_height()-tile_size):
-            drawing.blit(i["img"],(i["img_pos"][0],i["img_pos"][1]))
-    #events---------------------------------------------
+    #scrolling
     keys = pygame.key.get_pressed()
     if keys[K_w]:
         dw.scroll[1]+=scroll_speed            
         for i in map:
-           i["rect"].y += scroll_speed
-           i["img_pos"][1] += scroll_speed
+            i["rect"].y += scroll_speed
+            i["img_pos"][1] += scroll_speed
     if keys[K_s]:
         dw.scroll[1]-=scroll_speed
         for i in map:
@@ -155,8 +117,39 @@ while True:
             i["rect"].x -= scroll_speed
             i["img_pos"][0] -= scroll_speed
     
+    #endregion
     
-    #blit displays---------------------------------------
+    if mouse_display_pos=="drawing":
+        #draw the marker
+        if dw.selected_tile_img != None:
+            dw.drawTileHover([mx,my])
+            
+        #if the left click is being held
+        if hold_left:
+            #check if the tile exists in the array
+            found = False
+            for i in map:
+                if i["rect"] == dw.selected_tile_rect:
+                    found = True
+            
+            #if it does then append
+            if not found:
+                    map.append({"rect":dw.selected_tile_rect,"img_pos":dw.currentTilePos(),"img":dw.selected_tile_img})
+    
+    if mouse_display_pos =="side_top":
+        for i in range(len(sidetop.tilesets)):
+            if sidetop.buttons[i]["rect"].collidepoint([mx,my]):
+                pygame.draw.rect(sidetop.display,(20,20,20),sidetop.buttons[i]["rect"])
+    
+    #draw the current selected tile
+    if dw.selected_tile_img != None :
+        drawing.blit(dw.selected_tile_img,(10,10))
+
+    sidetop.listTilesets([mx,my]) 
+    sidebottom.drawTiles()
+    dw.drawMap(map)    
+        
+    #draw displays
     for i in range(len(surfaces)):
         screen.blit(surfaces[i][0],Dpos[i])
         surfaces[i][0].blit(pygame.transform.scale(surfaces[i][1],Dsizes[i]),(0,0))
