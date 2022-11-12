@@ -40,6 +40,7 @@ sidetop = ST.SideTop(surfaces[0][1])
 sidebottom = SB.SideBottom(surfaces[1][1])
 dw = DW.Drawing(surfaces[2][1],tile_size)
 
+hold_left = False
 
 #------------------------------------------------------
 frame = 0
@@ -66,12 +67,19 @@ while True:
                 mouse_display_pos = "drawing"
             mx = int(mx/Dscales[i])
             my = (my/Dscales[i])
-    #-----------------------------------------------------
+    
+    #-----------------------------------------------------   
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             sys.exit()
+            
+        if event.type == pygame.MOUSEBUTTONDOWN:
+            if event.button == 1:
+                hold_left = True                                    
+                                    
         if event.type == pygame.MOUSEBUTTONUP:
             if event.button == 1:
+                hold_left = False
                 if mouse_display_pos == "side_top":
                     sidebottom.buttons.clear()
                     tiles = sidetop.listClickedvalue([mx,my])
@@ -85,31 +93,24 @@ while True:
                     dw.selected_tile_rect = selected_tile["rect"]
                     dw.offset_index = selected_tile["index"]
                     dw.offset = fun.loadJson("assets/images/offsets/"+dw.offset_name)
-
-                if mouse_display_pos == "drawing":
-                    map.append(pygame.Rect(dw.selected_tile_rect.x,dw.selected_tile_rect.y,dw.selected_tile_rect.width,dw.selected_tile_rect.height))
-                
-    keys = pygame.key.get_pressed()
-    if keys[K_w]:
-        dw.scroll[1]+=scroll_speed
-        for i in map:
-            i.y += scroll_speed
-    if keys[K_s]:
-        dw.scroll[1]-=scroll_speed
-        for i in map:
-            i.y -= scroll_speed
-    if keys[K_a]:
-        dw.scroll[0]+=scroll_speed
-        for i in map:
-            i.x += scroll_speed
-    if keys[K_d]:
-        dw.scroll[0]-=scroll_speed
-        for i in map:
-            i.x -= scroll_speed
-    
+                 
     #draw the tile_marker
-    if dw.selected_tile_img != None and mouse_display_pos=="drawing":
-        dw.drawTileHover([mx,my])
+    if mouse_display_pos=="drawing":
+        if dw.selected_tile_img != None:
+            dw.drawTileHover([mx,my])
+            
+        #if the left click is being held
+        if hold_left:
+            #check if the tile exists in the array
+            found = False
+            for i in map:
+                if i["rect"] == dw.selected_tile_rect:
+                    found = True
+            
+            #if it does then append
+            if not found:
+                    map.append({"rect":dw.selected_tile_rect,"img_pos":dw.currentTilePos(),"img":dw.selected_tile_img})
+    
     #---------------------------------------------------
     if mouse_display_pos =="side_top":
         for i in range(len(sidetop.tilesets)):
@@ -125,15 +126,40 @@ while True:
     sidebottom.drawTiles()
 
     #drawing--------------------------------------------
-    
+
+    #draw the map to the drawing screen
     for i in map:
-        pygame.draw.rect(drawing,(255,0,0),i)
+        #we draw it if it can be seen bc we can improve the processing speed
+        if (i["img_pos"][0] > 0 and i["img_pos"][0] < drawing.get_width()-tile_size) and (i["img_pos"][1] > 0 and i["img_pos"][1] < drawing.get_height()-tile_size):
+            drawing.blit(i["img"],(i["img_pos"][0],i["img_pos"][1]))
+    #events---------------------------------------------
+    keys = pygame.key.get_pressed()
+    if keys[K_w]:
+        dw.scroll[1]+=scroll_speed            
+        for i in map:
+           i["rect"].y += scroll_speed
+           i["img_pos"][1] += scroll_speed
+    if keys[K_s]:
+        dw.scroll[1]-=scroll_speed
+        for i in map:
+            i["rect"].y -= scroll_speed
+            i["img_pos"][1] -= scroll_speed         
+    if keys[K_a]:
+        dw.scroll[0]+=scroll_speed
+        for i in map:
+            i["rect"].x += scroll_speed 
+            i["img_pos"][0] += scroll_speed          
+    if keys[K_d]:
+        dw.scroll[0]-=scroll_speed
+        for i in map:
+            i["rect"].x -= scroll_speed
+            i["img_pos"][0] -= scroll_speed
+    
     
     #blit displays---------------------------------------
     for i in range(len(surfaces)):
         screen.blit(surfaces[i][0],Dpos[i])
         surfaces[i][0].blit(pygame.transform.scale(surfaces[i][1],Dsizes[i]),(0,0))
-        
-
+    
     clock.tick(300)
     pygame.display.update()

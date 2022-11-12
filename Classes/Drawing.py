@@ -10,7 +10,7 @@ class Drawing:
         self.selected_tile_rect = None
         self.selected_tile_img = None
         self.tile_size = tilesize
-        
+        self.layer = 0
         self.scroll = [0,0]
         
         self.offset = None
@@ -20,6 +20,19 @@ class Drawing:
         self.tile_x = None
         self.tile_y = None
 
+    def currentTilePos(self):
+        #Check if this index in the offset
+        exists = False
+        for key in self.offset:
+            if key == str(self.offset_index):
+                exists= True
+        
+        #draw tile img with the offset           
+        if self.offset !={} and exists:
+            return [self.selected_tile_rect.x+self.offset[str(self.offset_index)]["x"],self.selected_tile_rect.y+self.offset[str(self.offset_index)]["y"]]
+        else:
+            return [self.selected_tile_rect.x,self.selected_tile_rect.y]
+    
     def drawTileHover(self,mouse_pos):
         
         #mousepos % tile_size(18) == 0  TRUE 
@@ -39,23 +52,12 @@ class Drawing:
         #mouse y config
         if not self.selected_tile_rect.colliderect(marker_y):
             self.selected_tile_rect.y -= self.tile_size
-        
-        pygame.draw.rect(self.display,(255,0,0),self.selected_tile_rect)
-        
+                
         placeholder_img = self.selected_tile_img.copy()
         placeholder_img.set_alpha(100)
         
-        #Check if this index in the offset
-        exists = False
-        for key in self.offset:
-            if key == str(self.offset_index):
-                exists= True
         
-        #draw tile img with the offset           
-        if self.offset !={} and exists:
-            self.display.blit(placeholder_img,(self.selected_tile_rect.x+self.offset[str(self.offset_index)]["x"],self.selected_tile_rect.y+self.offset[str(self.offset_index)]["y"]))
-        else:
-            self.display.blit(placeholder_img,(self.selected_tile_rect.x,self.selected_tile_rect.y))
+        self.display.blit(placeholder_img,self.currentTilePos())
 
     
         
