@@ -9,8 +9,6 @@ clock = pygame.time.Clock()
 
 pygame.init()
 
-map = []
-
 def scrollRect(left,top,width,height):
     return pygame.Rect(left+dw.scroll[0],top+dw.scroll[1],width,height)
 
@@ -33,18 +31,23 @@ drawing = surfaces[2][1]
 #endregion
 mouse_display_pos = any
 
+map = []
+
 tile_size = 18
 scroll_speed =1
+
+hold_left = False
+hold_right = False
+
 
 sidetop = ST.SideTop(surfaces[0][1])
 sidebottom = SB.SideBottom(surfaces[1][1])
 dw = DW.Drawing(surfaces[2][1],tile_size)
 
-hold_left = False
-
-#------------------------------------------------------
 frame = 0
 while True:
+    frame += 1
+
     #region fill displays
     side_top.fill((20, 35, 40))
     side_bottom.fill((20, 35, 40))
@@ -52,8 +55,7 @@ while True:
     pygame.draw.line(side_top,(100,100,100),(0,side_top.get_height()-1),(side_top.get_width()-1,side_top.get_height()-1))
     #endregion
 
-    frame += 1
-    #mouse positioning
+    #region mouse positioning
     mx,my = pygame.mouse.get_pos()
     for i in range(len(surfaces)):
         if surfaces[i][2].collidepoint(mx,my):
@@ -67,6 +69,7 @@ while True:
                 mouse_display_pos = "drawing"
             mx = int(mx/Dscales[i])
             my = (my/Dscales[i])
+    #endregion
     
     #region events
     for event in pygame.event.get():
@@ -75,7 +78,9 @@ while True:
             
         if event.type == pygame.MOUSEBUTTONDOWN:
             if event.button == 1:
-                hold_left = True                                    
+                hold_left = True
+            if event.button == 3:
+                hold_right = True                                 
                                     
         if event.type == pygame.MOUSEBUTTONUP:
             if event.button == 1:
@@ -93,7 +98,8 @@ while True:
                     dw.selected_tile_rect = selected_tile["rect"]
                     dw.offset_index = selected_tile["index"]
                     dw.offset = fun.loadJson("assets/images/offsets/"+dw.offset_name)
-
+            if event.button == 3:
+                hold_right = False
     #scrolling
     keys = pygame.key.get_pressed()
     if keys[K_w]:
@@ -124,18 +130,31 @@ while True:
         if dw.selected_tile_img != None:
             dw.drawTileHover([mx,my])
             
+        
+        #check if the tile exists in the array
+        found = False
+        founded_tile = None
+        for i in map:
+            # if i["rect"] == dw.selected_tile_rect and i["layer"] == dw.layer:
+            if i["rect"] == dw.selected_tile_rect and i["layer"] == dw.layer:
+                found = True
+                founded_tile = i
+        
         #if the left click is being held
         if hold_left:
-            #check if the tile exists in the array
-            found = False
-            for i in map:
-                if i["rect"] == dw.selected_tile_rect:
-                    found = True
-            
             #if it does then append
             if not found:
-                    map.append({"rect":dw.selected_tile_rect,"img_pos":dw.currentTilePos(),"img":dw.selected_tile_img})
-    
+                map.append(
+                    {"rect":dw.selected_tile_rect,
+                     "img_pos":dw.currentTilePos(),
+                     "img":dw.selected_tile_img,
+                     "layer":dw.layer
+                    })
+
+        if hold_right and found:
+            map.remove(founded_tile)
+            
+            
     if mouse_display_pos =="side_top":
         for i in range(len(sidetop.tilesets)):
             if sidetop.buttons[i]["rect"].collidepoint([mx,my]):
@@ -147,12 +166,12 @@ while True:
 
     sidetop.listTilesets([mx,my]) 
     sidebottom.drawTiles()
-    dw.drawMap(map)    
-        
-    #draw displays
+    dw.drawMap(map)
+    
+    #region draw displays
     for i in range(len(surfaces)):
         screen.blit(surfaces[i][0],Dpos[i])
         surfaces[i][0].blit(pygame.transform.scale(surfaces[i][1],Dsizes[i]),(0,0))
-    
+    #endregion
     clock.tick(300)
     pygame.display.update()

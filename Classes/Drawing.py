@@ -1,9 +1,6 @@
 import assets.editors.functions as fun
 import pygame,json
 import assets.editors.font as font
-
-
-
 class Drawing:
     def __init__(self,display,tilesize):
         self.display = display
