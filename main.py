@@ -9,8 +9,16 @@ clock = pygame.time.Clock()
 
 pygame.init()
 
-def scrollRect(left,top,width,height):
-    return pygame.Rect(left+dw.scroll[0],top+dw.scroll[1],width,height)
+def mapScrolling(ssp,axis):
+    
+    dw.scroll[axis]+=ssp           
+    for i in map:
+        if axis == "y":
+            i["rect"].y += ssp
+        else:
+            i["rect"].x += ssp
+            
+        i["img_pos"][axis] += ssp
 
 #region displays
 WINDOW_SIZE = [1000,700]
@@ -38,6 +46,11 @@ scroll_speed =1
 
 hold_left = False
 hold_right = False
+hold_ctrl = False
+
+filling_rect = [None,None]
+filling_rect_startscroll = None
+selected_filling_rect = None
 
 
 sidetop = ST.SideTop(surfaces[0][1])
@@ -68,20 +81,36 @@ while True:
                 mx -= 200
                 mouse_display_pos = "drawing"
             mx = int(mx/Dscales[i])
-            my = (my/Dscales[i])
+            my = int(my/Dscales[i])
     #endregion
     
     #region events
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             sys.exit()
+        
+        if event.type == pygame.KEYDOWN:
+            if event.key == K_LCTRL:
+                hold_ctrl = True
+
+        if event.type == pygame.KEYUP:
+            if event.key == K_LCTRL:
+                hold_ctrl = False
+                filling_rect = [None,None]
             
         if event.type == pygame.MOUSEBUTTONDOWN:
             if event.button == 1:
                 hold_left = True
+                
+                if hold_ctrl:
+                    filling_rect_startscroll = [-dw.scroll["x"],-dw.scroll["y"]]
+                    #set filling_rect startpos
+                    filling_rect[0] = [mx+filling_rect_startscroll[0],my+filling_rect_startscroll[1]]
+                    filling_rect[1] = [mx,my]
+                         
             if event.button == 3:
                 hold_right = True                                 
-                                    
+                    
         if event.type == pygame.MOUSEBUTTONUP:
             if event.button == 1:
                 hold_left = False
@@ -98,30 +127,21 @@ while True:
                     dw.selected_tile_rect = selected_tile["rect"]
                     dw.offset_index = selected_tile["index"]
                     dw.offset = fun.loadJson("assets/images/offsets/"+dw.offset_name)
+            
+                    
             if event.button == 3:
                 hold_right = False
+            
     #scrolling
     keys = pygame.key.get_pressed()
     if keys[K_w]:
-        dw.scroll[1]+=scroll_speed            
-        for i in map:
-            i["rect"].y += scroll_speed
-            i["img_pos"][1] += scroll_speed
+        mapScrolling(scroll_speed,"y")
     if keys[K_s]:
-        dw.scroll[1]-=scroll_speed
-        for i in map:
-            i["rect"].y -= scroll_speed
-            i["img_pos"][1] -= scroll_speed         
+        mapScrolling(-scroll_speed,"y")        
     if keys[K_a]:
-        dw.scroll[0]+=scroll_speed
-        for i in map:
-            i["rect"].x += scroll_speed 
-            i["img_pos"][0] += scroll_speed          
+        mapScrolling(scroll_speed,"x")          
     if keys[K_d]:
-        dw.scroll[0]-=scroll_speed
-        for i in map:
-            i["rect"].x -= scroll_speed
-            i["img_pos"][0] -= scroll_speed
+        mapScrolling(-scroll_speed,"x")
     
     #endregion
     
@@ -135,26 +155,29 @@ while True:
         found = False
         founded_tile = None
         for i in map:
-            # if i["rect"] == dw.selected_tile_rect and i["layer"] == dw.layer:
             if i["rect"] == dw.selected_tile_rect and i["layer"] == dw.layer:
                 found = True
                 founded_tile = i
         
         #if the left click is being held
         if hold_left:
-            #if it does then append
-            if not found:
-                map.append(
-                    {"rect":dw.selected_tile_rect,
-                     "img_pos":dw.currentTilePos(),
-                     "img":dw.selected_tile_img,
-                     "layer":dw.layer
-                    })
-
+            if not hold_ctrl:
+                if dw.offset_name != None and dw.offset_index != None:
+                    #if it does then append
+                    if not found:
+                        map.append(
+                            {"rect":dw.selected_tile_rect,
+                            "img_pos":{"x":dw.currentTilePos()[0],"y":dw.currentTilePos()[1]},
+                            "img":dw.selected_tile_img,
+                            "layer":dw.layer
+                            })
+            else:
+                filling_rect[1] = [mx,my]
+                selected_filling_rect = dw.select_filling_rect(filling_rect)
+                
         if hold_right and found:
             map.remove(founded_tile)
-            
-            
+                    
     if mouse_display_pos =="side_top":
         for i in range(len(sidetop.tilesets)):
             if sidetop.buttons[i]["rect"].collidepoint([mx,my]):

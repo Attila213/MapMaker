@@ -67,11 +67,14 @@ def loadJson(filename,value={}):
             except:
                 arr = value
     except:
-        writeJson(filename,value)
-        with open(filename+".json","r") as f:
-            arr=json.load(f)
+        arr = {}
     return arr
 
 def writeJson(filename,arr):
     with open(filename+".json", 'w') as outfile:
         json.dump(arr, outfile)
+
+def swap(a,b):
+    temp = a
+    a = b
+    b = temp
